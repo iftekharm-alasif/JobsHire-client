@@ -1,85 +1,63 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import React, { useState } from "react"
+import Link from "next/link"
+import { authClient } from "@/lib/auth-client"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
-import {
-  User,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  BriefcaseBusiness,
-} from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, BriefcaseBusiness } from "lucide-react"
 
 const SignUpPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
   setIsLoading(true);
 
-  try {
-    const formData = new FormData(e.currentTarget);
+  const formData = new FormData(e.currentTarget);
 
-    const { data, error } = await authClient.signUp.email({
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      callbackURL: "/",
-    });
+  const { data, error } = await authClient.signUp.email({
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+    callbackURL: "/",
+  });
 
-    if (error) {
-      console.log("Signup Error:", error);
-      alert(error.message || "Signup failed");
-      return;
-    }
-
-    if (data) {
-      console.log("Signup Successful:", data);
-      window.location.href = "/";
-    }
-  } catch (error) {
-    console.log("Signup Error Details:", error);
-    alert("Something went wrong. Please try again.");
-  } finally {
+  if (error) {
+    console.log("Signup Error:", error);
+    alert(error.message || "Signup failed");
     setIsLoading(false);
+    return;
   }
+
+  if (data) {
+    console.log("Signup Successful:", data);
+    window.location.href = "/";
+  }
+
+  setIsLoading(false);
 };
-
-
   return (
     <section className="flex min-h-screen items-center justify-center bg-[#090a0f] px-4 py-12 text-white">
       <div className="w-full max-w-md">
-
         {/* Logo */}
-        <Link
-          href="/"
-          className="mb-8 flex items-center justify-center gap-2"
-        >
+        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
           <div className="rounded-lg bg-indigo-600 p-2">
             <BriefcaseBusiness className="h-6 w-6 text-white" />
           </div>
 
-          <span className="text-2xl font-bold">
-            HireLoop
-          </span>
+          <span className="text-2xl font-bold">HireLoop</span>
         </Link>
 
         {/* Signup Card */}
         <div className="rounded-2xl border border-slate-800 bg-[#11131c] p-6 shadow-2xl sm:p-8">
-
           {/* Heading */}
           <div className="mb-7 text-center">
-            <h1 className="text-3xl font-bold">
-              Create Your Account
-            </h1>
+            <h1 className="text-3xl font-bold">Create Your Account</h1>
 
             <p className="mt-2 text-slate-400">
               Join HireLoop and find your dream opportunity.
@@ -88,7 +66,6 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
           {/* Signup Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-slate-200">
@@ -152,9 +129,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-500 hover:text-white"
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -183,10 +158,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 className="text-sm leading-5 text-slate-400"
               >
                 I agree to the{" "}
-                <Link
-                  href="/terms"
-                  className="text-indigo-400 hover:underline"
-                >
+                <Link href="/terms" className="text-indigo-400 hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
@@ -228,10 +200,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             variant="outline"
             className="h-12 w-full border-slate-700 bg-transparent text-white hover:bg-slate-800"
           >
-            <svg
-              className="mr-2 h-5 w-5"
-              viewBox="0 0 48 48"
-            >
+            <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48">
               <path
                 fill="#EA4335"
                 d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"
@@ -249,7 +218,6 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                 d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
               />
             </svg>
-
             Continue with Google
           </Button>
 
@@ -269,10 +237,9 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         <p className="mt-6 text-center text-xs text-slate-600">
           © 2026 HireLoop. All rights reserved.
         </p>
-
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default SignUpPage;
+export default SignUpPage
