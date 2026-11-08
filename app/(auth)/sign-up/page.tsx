@@ -1,79 +1,110 @@
-"use client"
 
-import React, { useState } from "react"
-import Link from "next/link"
-import { authClient } from "@/lib/auth-client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import React, { useState } from "react";
+import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
 
-import { User, Mail, Lock, Eye, EyeOff, BriefcaseBusiness } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  BriefcaseBusiness,
+  UserRound,
+  Building2,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
 const SignUpPage = () => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<
+  "seeker" | "recruiter" | "admin"
+>("seeker");
 
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget);
 
-  const { data, error } = await authClient.signUp.email({
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    callbackURL: "/",
-  });
+    const { data, error } = await authClient.signUp.email({
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+      role: selectedRole,
+      callbackURL: "/",
+    });
 
-  if (error) {
-    console.log("Signup Error:", error);
-    alert(error.message || "Signup failed");
+    if (error) {
+      console.log("Signup Error:", error);
+      alert(error.message || "Signup failed");
+      setIsLoading(false);
+      return;
+    }
+
+    if (data) {
+      window.location.href = "/";
+    }
+
     setIsLoading(false);
-    return;
-  }
+  };
 
-  if (data) {
-    console.log("Signup Successful:", data);
-    window.location.href = "/";
-  }
-
-  setIsLoading(false);
-};
   return (
-    <section className="flex min-h-screen items-center justify-center bg-[#090a0f] px-4 py-12 text-white">
-      <div className="w-full max-w-md">
+    <section className="min-h-screen bg-[#090a0f] px-4 py-12 text-white flex items-center justify-center">
+
+      <div className="w-full max-w-lg">
+
         {/* Logo */}
-        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
-          <div className="rounded-lg bg-indigo-600 p-2">
+        <Link
+          href="/"
+          className="mb-8 flex items-center justify-center gap-2"
+        >
+          <div className="rounded-xl bg-indigo-600 p-2.5 shadow-lg shadow-indigo-600/20">
             <BriefcaseBusiness className="h-6 w-6 text-white" />
           </div>
 
-          <span className="text-2xl font-bold">HireLoop</span>
+          <span className="text-2xl font-bold tracking-tight">
+            Hire<span className="text-indigo-400">Loop</span>
+          </span>
         </Link>
 
         {/* Signup Card */}
-        <div className="rounded-2xl border border-slate-800 bg-[#11131c] p-6 shadow-2xl sm:p-8">
-          {/* Heading */}
-          <div className="mb-7 text-center">
-            <h1 className="text-3xl font-bold">Create Your Account</h1>
+        <div className="rounded-2xl border border-slate-800 bg-[#11131c] p-6 shadow-2xl sm:p-9">
 
-            <p className="mt-2 text-slate-400">
-              Join HireLoop and find your dream opportunity.
+          {/* Heading */}
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10">
+              <UserRound className="h-7 w-7 text-indigo-400" />
+            </div>
+
+            <h1 className="text-3xl font-bold tracking-tight">
+              Create Your Account
+            </h1>
+
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              Join HireLoop and take the next step in your professional journey.
             </p>
           </div>
 
-          {/* Signup Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-200">
+              <Label htmlFor="name" className="text-sm font-medium text-slate-200">
                 Full Name
               </Label>
 
               <div className="relative">
-                <User className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <User className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="name"
@@ -81,19 +112,19 @@ const SignUpPage = () => {
                   type="text"
                   placeholder="Enter your full name"
                   required
-                  className="h-12 border-slate-800 bg-[#090a0f] pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-600"
+                  className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-200">
+              <Label htmlFor="email" className="text-sm font-medium text-slate-200">
                 Email Address
               </Label>
 
               <div className="relative">
-                <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Mail className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="email"
@@ -101,34 +132,124 @@ const SignUpPage = () => {
                   type="email"
                   placeholder="you@example.com"
                   required
-                  className="h-12 border-slate-800 bg-[#090a0f] pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-600"
+                  className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
                 />
               </div>
             </div>
 
+{/* Role Selection */}
+<div className="space-y-3">
+  <div>
+    <Label className="text-sm font-medium text-slate-200">
+      I want to join as a
+    </Label>
+
+    <p className="mt-1 text-xs text-slate-500">
+      Choose your account type.
+    </p>
+  </div>
+
+  <div className="grid grid-cols-3 gap-3">
+    {/* Seeker */}
+    <button
+      type="button"
+      onClick={() => setSelectedRole("seeker")}
+      className={`relative rounded-xl border p-3 text-left transition ${
+        selectedRole === "seeker"
+          ? "border-indigo-500 bg-indigo-500/10"
+          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+      }`}
+    >
+      {selectedRole === "seeker" && (
+        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+      )}
+
+      <UserRound className="mb-3 h-6 w-6 text-indigo-400" />
+
+      <h3 className="text-sm font-semibold text-white">
+        Job Seeker
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-400">
+        Find jobs.
+      </p>
+    </button>
+
+    {/* Recruiter */}
+    <button
+      type="button"
+      onClick={() => setSelectedRole("recruiter")}
+      className={`relative rounded-xl border p-3 text-left transition ${
+        selectedRole === "recruiter"
+          ? "border-indigo-500 bg-indigo-500/10"
+          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+      }`}
+    >
+      {selectedRole === "recruiter" && (
+        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+      )}
+
+      <Building2 className="mb-3 h-6 w-6 text-indigo-400" />
+
+      <h3 className="text-sm font-semibold text-white">
+        Recruiter
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-400">
+        Hire talent.
+      </p>
+    </button>
+
+    {/* Admin */}
+    <button
+      type="button"
+      onClick={() => setSelectedRole("admin")}
+      className={`relative rounded-xl border p-3 text-left transition ${
+        selectedRole === "admin"
+          ? "border-indigo-500 bg-indigo-500/10"
+          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+      }`}
+    >
+      {selectedRole === "admin" && (
+        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+      )}
+
+      <BriefcaseBusiness className="mb-3 h-6 w-6 text-indigo-400" />
+
+      <h3 className="text-sm font-semibold text-white">
+        Admin
+      </h3>
+
+      <p className="mt-1 text-xs text-slate-400">
+        Manage platform.
+      </p>
+    </button>
+  </div>
+</div>
+
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-200">
+              <Label htmlFor="password" className="text-sm font-medium text-slate-200">
                 Password
               </Label>
 
               <div className="relative">
-                <Lock className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Lock className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
+                  placeholder="Create a strong password"
                   minLength={8}
                   required
-                  className="h-12 border-slate-800 bg-[#090a0f] pr-11 pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-600"
+                  className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pl-11 pr-12 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-500 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -140,12 +261,12 @@ const SignUpPage = () => {
               </div>
 
               <p className="text-xs text-slate-500">
-                Password must be at least 8 characters.
+                Use at least 8 characters for your password.
               </p>
             </div>
 
             {/* Terms */}
-            <div className="flex items-start gap-2 pt-1">
+            <div className="flex items-start gap-3 pt-1">
               <input
                 type="checkbox"
                 id="terms"
@@ -155,34 +276,39 @@ const SignUpPage = () => {
 
               <Label
                 htmlFor="terms"
-                className="text-sm leading-5 text-slate-400"
+                className="text-xs leading-5 text-slate-400"
               >
                 I agree to the{" "}
                 <Link href="/terms" className="text-indigo-400 hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link
-                  href="/privacy"
-                  className="text-indigo-400 hover:underline"
-                >
+                <Link href="/privacy" className="text-indigo-400 hover:underline">
                   Privacy Policy
-                </Link>
+                </Link>.
               </Label>
             </div>
 
-            {/* Create Account */}
+            {/* Submit */}
             <Button
               type="submit"
               disabled={isLoading}
-              className="h-12 w-full bg-indigo-600 font-semibold text-white hover:bg-indigo-500"
+              className="h-12 w-full rounded-xl bg-indigo-600 font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500"
             >
-              {isLoading ? "Creating Account..." : "Create Account"}
+              {isLoading ? (
+                "Creating Account..."
+              ) : (
+                <span className="flex items-center gap-2">
+                  Create Account
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              )}
             </Button>
+
           </form>
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative my-7">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-slate-800" />
             </div>
@@ -194,11 +320,11 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          {/* Google Signup UI Only */}
+          {/* Google Button */}
           <Button
             type="button"
             variant="outline"
-            className="h-12 w-full border-slate-700 bg-transparent text-white hover:bg-slate-800"
+            className="h-12 w-full rounded-xl border-slate-700 bg-transparent text-white transition hover:bg-slate-800"
           >
             <svg className="mr-2 h-5 w-5" viewBox="0 0 48 48">
               <path
@@ -222,24 +348,25 @@ const SignUpPage = () => {
           </Button>
 
           {/* Sign In */}
-          <p className="mt-6 text-center text-sm text-slate-400">
+          <p className="mt-7 text-center text-sm text-slate-400">
             Already have an account?{" "}
             <Link
-              href="/signin"
-              className="font-semibold text-indigo-400 hover:text-indigo-300"
+              href="/sign-in"
+              className="font-semibold text-indigo-400 transition hover:text-indigo-300"
             >
               Sign In
             </Link>
           </p>
+
         </div>
 
-        {/* Footer */}
         <p className="mt-6 text-center text-xs text-slate-600">
           © 2026 HireLoop. All rights reserved.
         </p>
+
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default SignUpPage
+export default SignUpPage;

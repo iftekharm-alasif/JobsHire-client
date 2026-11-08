@@ -9,7 +9,18 @@ const db = client.db("hireloopdb")
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
-  }, 
+  },
+
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "seeker",
+        input: true,
+      },
+    },
+  },
 
   database: mongodbAdapter(db, {
     client,
