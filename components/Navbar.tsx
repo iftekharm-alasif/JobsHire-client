@@ -28,7 +28,8 @@ const navLinks = [
 { name: "Browse Jobs", href: "/jobs" },
 { name: "Company", href: "/company" },
 { name: "Pricing", href: "/pricing" },
-];
+{ name: "Dashboard", href: `/dashboard/${session?.user?.role || 'seeker'}` },
+] as const
 
 const handleLogout = async () => {
 await authClient.signOut();
@@ -71,72 +72,61 @@ return (
 
       {/* Desktop Actions */}
       <div className="hidden md:flex items-center gap-4">
-
-        {!isPending && (
-          session?.user ? (
-            <div className="relative">
-
-              <button
-                onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center gap-2 text-white"
-              >
-                {session.user.image ? (
-                  <img
-                    src={session.user.image}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">
-                    {session.user.name?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                )}
-
-                <span>{session.user.name}</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-
-              {showProfile && (
-                <div className="absolute right-0 top-14 w-44 bg-[#181818] border border-neutral-700 rounded-lg p-2 z-50">
-
-                  <Link
-                    href="/profile"
-                    onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2 p-3 text-white hover:bg-neutral-800 rounded"
-                  >
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full p-3 text-red-400 hover:bg-neutral-800 rounded"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-
-                </div>
-              )}
-
-            </div>
-          ) : (
-            <>
-              <Link
-                href="/sign-in"
-                className="text-sm text-neutral-300 hover:text-white px-4 py-2"
-              >
-                Sign In
-              </Link>
-
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Link href="/sign-up">Get Started</Link>
-              </Button>
-            </>
-          )
+  {session?.user ? (
+    <div className="relative">
+      <button
+        onClick={() => setShowProfile(!showProfile)}
+        className="flex items-center gap-2 text-white"
+      >
+        {session.user.image ? (
+          <img
+            src={session.user.image}
+            alt="Profile"
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">
+            {session.user.name?.charAt(0).toUpperCase() || "U"}
+          </div>
         )}
 
-      </div>
+        <span>{session.user.name}</span>
+        <ChevronDown className="w-4 h-4" />
+      </button>
+
+      {showProfile && (
+        <div className="absolute right-0 top-14 w-44 bg-[#181818] border border-neutral-700 rounded-lg p-2 z-50">
+          <Link
+            href="/profile"
+            onClick={() => setShowProfile(false)}
+            className="flex items-center gap-2 p-3 text-white hover:bg-neutral-800 rounded"
+          >
+            <User className="w-4 h-4" />
+            Profile
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full p-3 text-red-400 hover:bg-neutral-800 rounded"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  ) : (
+    <>
+      <Link href="/sign-in" className="text-sm text-neutral-300 hover:text-white px-4 py-2">
+        Sign In
+      </Link>
+
+      <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Link href="/sign-up">Get Started</Link>
+      </Button>
+    </>
+  )}
+</div>
 
       {/* Mobile Menu */}
       <div className="md:hidden">
