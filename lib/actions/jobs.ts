@@ -16,3 +16,15 @@ export const createJob = async (data: any) => {
 
   return res.json();
 };
+
+export const deleteJob = async (jobId: string) => {
+  const res = await fetch(`${BASE_URL}/jobs/${jobId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    throw new Error(`Delete failed: ${res.status}`);
+  }
+
+  return res.json();
+};

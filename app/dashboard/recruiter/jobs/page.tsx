@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,7 +10,6 @@ import {
   CalendarDays,
   Users,
   Pencil,
-  Trash2,
   BriefcaseBusiness,
   CheckCircle2,
   Clock,
@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getJobs } from "@/lib/api/jobs";
+import { DeleteJobDialog } from "@/components/DeleteJobDialog";
 
 type Job = {
   _id: string;
@@ -57,6 +58,12 @@ const ManageJobsPage = () => {
     fetchJobs();
   }, []);
 
+  // Remove deleted job from the UI
+  const handleJobDeleted = (id: string) => {
+    setJobs((prev) => prev.filter((job) => job._id !== id));
+  };
+
+  // Search and filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -68,11 +75,16 @@ const ManageJobsPage = () => {
     return matchesSearch && matchesFilter;
   });
 
+  // Calculate statistics
   const totalJobs = jobs.length;
+
   const activeJobs = jobs.filter(
     (job) => (job.status || "Active") === "Active"
   ).length;
-  const draftJobs = jobs.filter((job) => job.status === "Draft").length;
+
+  const draftJobs = jobs.filter(
+    (job) => job.status === "Draft"
+  ).length;
 
   const totalApplications = jobs.reduce(
     (total, job) => total + (Number(job.applications) || 0),
@@ -108,11 +120,13 @@ const ManageJobsPage = () => {
 
   return (
     <div className="min-h-screen space-y-8 bg-[#101B2B] p-4 text-white sm:p-6 lg:p-8">
+      {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">
             Manage Jobs
           </h1>
+
           <p className="mt-2 text-sm text-slate-400">
             Manage and track all your job postings in one place.
           </p>
@@ -126,6 +140,7 @@ const ManageJobsPage = () => {
         </Link>
       </div>
 
+      {/* Statistics */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
@@ -133,24 +148,34 @@ const ManageJobsPage = () => {
             className="rounded-xl border border-[#344459] bg-[#172538] p-5"
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-400">{stat.title}</p>
+              <p className="text-sm text-slate-400">
+                {stat.title}
+              </p>
+
               <stat.icon className={`h-5 w-5 ${stat.color}`} />
             </div>
 
-            <h2 className="mt-3 text-3xl font-bold">{stat.value}</h2>
+            <h2 className="mt-3 text-3xl font-bold">
+              {stat.value}
+            </h2>
           </div>
         ))}
       </div>
 
+      {/* Job Listings */}
       <div className="rounded-xl border border-[#344459] bg-[#172538]">
         <div className="border-b border-[#344459] p-5">
-          <h2 className="text-lg font-semibold">Your Job Postings</h2>
+          <h2 className="text-lg font-semibold">
+            Your Job Postings
+          </h2>
+
           <p className="mt-1 text-sm text-slate-400">
             View, search and manage your published jobs.
           </p>
 
+          {/* Search */}
           <div className="relative mt-5">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
             <Input
               placeholder="Search by job title or company..."
@@ -160,6 +185,7 @@ const ManageJobsPage = () => {
             />
           </div>
 
+          {/* Filters */}
           <div className="mt-5 flex flex-wrap gap-2">
             {["All", "Active", "Expired", "Draft"].map((item) => (
               <Button
@@ -178,6 +204,7 @@ const ManageJobsPage = () => {
           </div>
         </div>
 
+        {/* Jobs */}
         <div className="space-y-4 p-5">
           {loading ? (
             <p className="py-12 text-center text-slate-400">
@@ -201,8 +228,8 @@ const ManageJobsPage = () => {
                           (job.status || "Active") === "Active"
                             ? "bg-emerald-500/15 text-emerald-400"
                             : job.status === "Draft"
-                            ? "bg-amber-500/15 text-amber-400"
-                            : "bg-red-500/15 text-red-400"
+                              ? "bg-amber-500/15 text-amber-400"
+                              : "bg-red-500/15 text-red-400"
                         }`}
                       >
                         {job.status || "Active"}
@@ -244,21 +271,23 @@ const ManageJobsPage = () => {
                         <CalendarDays className="h-4 w-4" />
                         Deadline:{" "}
                         {job.deadline
-                          ? new Date(`${job.deadline}T00:00:00`).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )
+                          ? new Date(
+                              `${job.deadline}T00:00:00`
+                            ).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
                           : "Not set"}
                       </span>
                     </div>
                   </div>
 
+                  {/* Actions */}
                   <div className="flex gap-2">
-                    <Link href={`/dashboard/recruiter/jobs/${job._id}/edit`}>
+                    <Link
+                      href={`/dashboard/recruiter/jobs/${job._id}/edit`}
+                    >
                       <Button
                         size="sm"
                         variant="outline"
@@ -269,14 +298,10 @@ const ManageJobsPage = () => {
                       </Button>
                     </Link>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </Button>
+                    <DeleteJobDialog
+                      job={job}
+                      onDeleted={handleJobDeleted}
+                    />
                   </div>
                 </div>
               </div>
@@ -285,7 +310,9 @@ const ManageJobsPage = () => {
             <div className="py-12 text-center">
               <BriefcaseBusiness className="mx-auto h-10 w-10 text-slate-500" />
 
-              <h3 className="mt-4 font-semibold">No jobs found</h3>
+              <h3 className="mt-4 font-semibold">
+                No jobs found
+              </h3>
 
               <p className="mt-2 text-sm text-slate-400">
                 Try another search or filter.
@@ -295,6 +322,7 @@ const ManageJobsPage = () => {
         </div>
       </div>
 
+      {/* Results Count */}
       <p className="text-sm text-slate-500">
         Showing {filteredJobs.length} of {totalJobs} jobs
       </p>
