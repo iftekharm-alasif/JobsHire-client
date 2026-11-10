@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import {
   BriefcaseBusiness,
   Building2,
@@ -20,9 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
 import { createJob } from "@/lib/actions/jobs"
 
 const AddJobPage = () => {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -40,37 +46,27 @@ const AddJobPage = () => {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  const result = await createJob(form);
-console.log(form)
-  console.log("Job Created:", result);
+    try {
+      setLoading(true)
 
-  alert("Job published successfully!");
+      await createJob(form)
 
+      toast.success("Job published successfully!")
 
-//   const response = await fetch("http://localhost:5000/jobs", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(form),
-//   });
+      setTimeout(() => {
+        router.push("/dashboard/recruiter/jobs")
+      }, 1000)
+    } catch (error) {
+      toast.error("Failed to publish job!")
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-//   const data = await response.text();
-
-//   console.log("Status:", response.status);
-//   console.log("Response:", data);
-
-//   if (response.ok) {
-//     alert("Job published successfully!");
-//   } else {
-//     alert("Failed to publish job!");
-//   }
-
-}; 
   return (
     <div className="min-h-screen bg-[#101B2B] p-4 text-slate-100 md:p-8">
       <div className="mx-auto max-w-5xl space-y-7">
@@ -315,6 +311,7 @@ console.log(form)
             <Button
               type="button"
               variant="outline"
+              disabled={loading}
               className="border-[#344459] bg-transparent text-slate-300 hover:bg-[#172538] hover:text-white"
               onClick={() =>
                 setForm({
@@ -336,9 +333,10 @@ console.log(form)
 
             <Button
               type="submit"
+              disabled={loading}
               className="bg-emerald-600 px-8 text-white hover:bg-emerald-700"
             >
-              Publish Job
+              {loading ? "Publishing..." : "Publish Job"}
             </Button>
           </div>
         </form>

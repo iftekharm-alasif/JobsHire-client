@@ -1,8 +1,7 @@
+"use client"
 
-"use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
   Search,
   Plus,
@@ -14,82 +13,80 @@ import {
   CheckCircle2,
   Clock,
   FileText,
-} from "lucide-react";
+} from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { getJobs } from "@/lib/api/jobs";
-import { DeleteJobDialog } from "@/components/DeleteJobDialog";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { getJobs } from "@/lib/api/jobs"
+import { DeleteJobDialog } from "@/components/DeleteJobDialog"
 
 type Job = {
-  _id: string;
-  title: string;
-  company: string;
-  category: string;
-  location: string;
-  type: string;
-  jobType?: string;
-  workplace: string;
-  salary: string;
-  applications?: number;
-  status?: string;
-  deadline: string;
-};
+  _id: string
+  title: string
+  company: string
+  category: string
+  location: string
+  type: string
+  jobType?: string
+  workplace: string
+  salary: string
+  applications?: number
+  status?: string
+  deadline: string
+}
 
 const ManageJobsPage = () => {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [search, setSearch] = useState("")
+  const [filter, setFilter] = useState("All")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const data = await getJobs();
-        setJobs(Array.isArray(data) ? data : []);
+        const data = await getJobs()
+        setJobs(Array.isArray(data) ? data.reverse() : [])
       } catch (error) {
-        console.error("Failed to fetch jobs:", error);
+        console.error("Failed to fetch jobs:", error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchJobs();
-  }, []);
+    fetchJobs()
+  }, [])
 
   // Remove deleted job from the UI
   const handleJobDeleted = (id: string) => {
-    setJobs((prev) => prev.filter((job) => job._id !== id));
-  };
+    setJobs((prev) => prev.filter((job) => job._id !== id))
+  }
 
   // Search and filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title?.toLowerCase().includes(search.toLowerCase()) ||
-      job.company?.toLowerCase().includes(search.toLowerCase());
+      job.company?.toLowerCase().includes(search.toLowerCase())
 
     const matchesFilter =
-      filter === "All" || (job.status || "Active") === filter;
+      filter === "All" || (job.status || "Active") === filter
 
-    return matchesSearch && matchesFilter;
-  });
+    return matchesSearch && matchesFilter
+  })
 
   // Calculate statistics
-  const totalJobs = jobs.length;
+  const totalJobs = jobs.length
 
   const activeJobs = jobs.filter(
     (job) => (job.status || "Active") === "Active"
-  ).length;
+  ).length
 
-  const draftJobs = jobs.filter(
-    (job) => job.status === "Draft"
-  ).length;
+  const draftJobs = jobs.filter((job) => job.status === "Draft").length
 
   const totalApplications = jobs.reduce(
     (total, job) => total + (Number(job.applications) || 0),
     0
-  );
+  )
 
   const stats = [
     {
@@ -116,16 +113,14 @@ const ManageJobsPage = () => {
       icon: Users,
       color: "text-purple-400",
     },
-  ];
+  ]
 
   return (
     <div className="min-h-screen space-y-8 bg-[#101B2B] p-4 text-white sm:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">
-            Manage Jobs
-          </h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Manage Jobs</h1>
 
           <p className="mt-2 text-sm text-slate-400">
             Manage and track all your job postings in one place.
@@ -148,16 +143,12 @@ const ManageJobsPage = () => {
             className="rounded-xl border border-[#344459] bg-[#172538] p-5"
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-400">
-                {stat.title}
-              </p>
+              <p className="text-sm text-slate-400">{stat.title}</p>
 
               <stat.icon className={`h-5 w-5 ${stat.color}`} />
             </div>
 
-            <h2 className="mt-3 text-3xl font-bold">
-              {stat.value}
-            </h2>
+            <h2 className="mt-3 text-3xl font-bold">{stat.value}</h2>
           </div>
         ))}
       </div>
@@ -165,9 +156,7 @@ const ManageJobsPage = () => {
       {/* Job Listings */}
       <div className="rounded-xl border border-[#344459] bg-[#172538]">
         <div className="border-b border-[#344459] p-5">
-          <h2 className="text-lg font-semibold">
-            Your Job Postings
-          </h2>
+          <h2 className="text-lg font-semibold">Your Job Postings</h2>
 
           <p className="mt-1 text-sm text-slate-400">
             View, search and manage your published jobs.
@@ -207,9 +196,7 @@ const ManageJobsPage = () => {
         {/* Jobs */}
         <div className="space-y-4 p-5">
           {loading ? (
-            <p className="py-12 text-center text-slate-400">
-              Loading jobs...
-            </p>
+            <p className="py-12 text-center text-slate-400">Loading jobs...</p>
           ) : filteredJobs.length > 0 ? (
             filteredJobs.map((job) => (
               <div
@@ -219,9 +206,7 @@ const ManageJobsPage = () => {
                 <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-lg font-semibold">
-                        {job.title}
-                      </h3>
+                      <h3 className="text-lg font-semibold">{job.title}</h3>
 
                       <Badge
                         className={`border-0 ${
@@ -258,9 +243,7 @@ const ManageJobsPage = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-5 text-sm">
-                      <span className="text-emerald-400">
-                        {job.salary}
-                      </span>
+                      <span className="text-emerald-400">{job.salary}</span>
 
                       <span className="flex items-center gap-2 text-slate-400">
                         <Users className="h-4 w-4" />
@@ -285,9 +268,7 @@ const ManageJobsPage = () => {
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <Link
-                      href={`/dashboard/recruiter/jobs/${job._id}/edit`}
-                    >
+                    <Link href={`/dashboard/recruiter/jobs/${job._id}/edit`}>
                       <Button
                         size="sm"
                         variant="outline"
@@ -298,10 +279,7 @@ const ManageJobsPage = () => {
                       </Button>
                     </Link>
 
-                    <DeleteJobDialog
-                      job={job}
-                      onDeleted={handleJobDeleted}
-                    />
+                    <DeleteJobDialog job={job} onDeleted={handleJobDeleted} />
                   </div>
                 </div>
               </div>
@@ -310,9 +288,7 @@ const ManageJobsPage = () => {
             <div className="py-12 text-center">
               <BriefcaseBusiness className="mx-auto h-10 w-10 text-slate-500" />
 
-              <h3 className="mt-4 font-semibold">
-                No jobs found
-              </h3>
+              <h3 className="mt-4 font-semibold">No jobs found</h3>
 
               <p className="mt-2 text-sm text-slate-400">
                 Try another search or filter.
@@ -327,7 +303,7 @@ const ManageJobsPage = () => {
         Showing {filteredJobs.length} of {totalJobs} jobs
       </p>
     </div>
-  );
-};
+  )
+}
 
-export default ManageJobsPage;
+export default ManageJobsPage
