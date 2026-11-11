@@ -1,6 +1,8 @@
 import React from "react"
 import SearchBar from "@/components/SearchBar"
 import JobFilters from "@/components/JobFilters"
+import SaveJobButton from "@/components/SaveJobButton"
+
 import {
   Search,
   MapPin,
@@ -141,9 +143,13 @@ const BrowseJobs = async ({
                         </p>
                       </div>
 
-                      <span className="h-fit w-fit rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
-                        {job.type}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="h-fit w-fit rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
+                          {job.type}
+                        </span>
+
+                        <SaveJobButton jobId={job._id} />
+                      </div>
                     </div>
 
                     <div className="my-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-slate-400">
