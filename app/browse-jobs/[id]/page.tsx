@@ -1,4 +1,5 @@
 import Link from "next/link"
+import ApplyButton from "@/components/ApplyButton";
 import {
   ArrowLeft,
   MapPin,
@@ -178,13 +179,7 @@ const JobDetailsPage = async ({
               </div>
             </div>
 
-            <Link
-              href={`/sign-in?redirect=${encodeURIComponent(`/apply-job/${job._id}`)}`}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
-            >
-              Apply Now
-              <Send size={17} />
-            </Link>
+       <ApplyButton jobId={job._id} />
             <p className="mt-4 text-center text-xs text-slate-500">
               Make sure your profile and application details are up to date.
             </p>
