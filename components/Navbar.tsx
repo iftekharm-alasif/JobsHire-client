@@ -18,7 +18,7 @@ const Navbar = () => {
   const { data: session, isPending } = authClient.useSession()
 
   const navLinks = [
-    { name: "Browse Jobs", href: "/jobs" },
+    { name: "Browse Jobs", href: "/browse-jobs" },
     { name: "Company", href: "/company" },
     { name: "Pricing", href: "/pricing" },
     {

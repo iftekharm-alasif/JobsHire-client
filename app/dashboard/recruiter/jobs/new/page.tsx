@@ -176,11 +176,10 @@ const AddJobPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {[
-                      "Full-time",
-                      "Part-time",
+                      "Full time",
+                      "Part time",
                       "Internship",
                       "Contract",
-                      "Freelance",
                     ].map((item) => (
                       <SelectItem key={item} value={item}>
                         {item}
