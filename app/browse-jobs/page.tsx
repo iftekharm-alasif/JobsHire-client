@@ -1,29 +1,30 @@
-
-import React from "react";
-import SearchBar from "@/components/SearchBar";
+import React from "react"
+import SearchBar from "@/components/SearchBar"
+import JobFilters from "@/components/JobFilters"
 import {
   Search,
   MapPin,
   BriefcaseBusiness,
   Building2,
   CalendarDays,
-  SlidersHorizontal,
-} from "lucide-react";
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
+import Link from "next/link"
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 
 type Job = {
-  _id: string;
-  title: string;
-  company: string;
-  category: string;
-  location: string;
-  type: string;
-  workplace: string;
-  salary: string;
-  deadline: string;
-};
+  _id: string
+  title: string
+  company: string
+  category: string
+  location: string
+  type: string
+  workplace: string
+  salary: string
+  deadline: string
+}
 
 const categories = [
   "Software Development",
@@ -35,51 +36,58 @@ const categories = [
   "Mobile App Development",
   "Data Science",
   "DevOps & Cloud Engineering",
-];
+]
 
 const BrowseJobs = async ({
   searchParams,
 }: {
   searchParams: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
+    [key: string]: string | string[] | undefined
+  }>
 }) => {
-  const search = await searchParams;
+  const search = await searchParams
 
   const getValue = (value: string | string[] | undefined) =>
-    Array.isArray(value) ? value[0] : value || "";
+    Array.isArray(value) ? value[0] : value || ""
 
-  const keyword = getValue(search.search);
-  const category = getValue(search.category);
-  const location = getValue(search.location);
-  const type = getValue(search.type);
-  const workplace = getValue(search.workplace);
-  const requirements = getValue(search.requirements);
+  const keyword = getValue(search.search)
+  const category = getValue(search.category)
+  const location = getValue(search.location)
+  const type = getValue(search.type)
+  const workplace = getValue(search.workplace)
+  const requirements = getValue(search.requirements)
 
-  const params = new URLSearchParams();
+  const page = Math.max(1, Number(getValue(search.page)) || 1)
 
-  if (category) params.set("category", category);
-  if (location) params.set("location", location);
-  if (type) params.set("type", type);
-  if (workplace) params.set("workplace", workplace);
-  if (requirements) params.set("requirements", requirements);
+  const params = new URLSearchParams()
+
+  if (keyword) params.set("search", keyword)
+  if (category) params.set("category", category)
+  if (location) params.set("location", location)
+  if (type) params.set("type", type)
+  if (workplace) params.set("workplace", workplace)
+  if (requirements) params.set("requirements", requirements)
+
+  params.set("page", String(page))
 
   const res = await fetch(`${BASE_URL}/jobs?${params.toString()}`, {
     cache: "no-store",
-  });
+  })
 
   if (!res.ok) {
-    throw new Error("Failed to fetch jobs");
+    throw new Error("Failed to fetch jobs")
   }
 
-  const allJobs: Job[] = await res.json();
+  const data = await res.json()
 
-const jobs = allJobs;
+  const jobs: Job[] = data.jobs
+  const totalJobs: number = data.totalJobs
+  const totalPages: number = data.totalPages
+  const currentPage: number = data.currentPage
 
   return (
     <div className="min-h-screen bg-[#101B2B] px-4 py-10 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
-
         {/* Header */}
         <div className="mb-8">
           <p className="mb-2 text-sm font-medium text-emerald-400">
@@ -100,126 +108,8 @@ const jobs = allJobs;
 
         {/* Main Content */}
         <div className="grid gap-8 lg:grid-cols-[270px_1fr]">
-
           {/* Sidebar */}
-          <aside className="h-fit rounded-xl border border-[#344459] bg-[#172538] p-5">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-semibold">
-                <SlidersHorizontal size={19} />
-                Filters
-              </h2>
-
-              <a
-                href="/browse-jobs"
-                className="text-sm text-emerald-400 hover:text-emerald-300"
-              >
-                Clear All
-              </a>
-            </div>
-
-            <form action="/browse-jobs" method="GET" className="space-y-6">
-
-              {/* Keep Search */}
-              <input type="hidden" name="search" value={keyword} />
-
-              {/* Category */}
-              <div>
-                <label className="mb-3 block text-sm font-medium">
-                  Job Category
-                </label>
-
-                <select
-                  name="category"
-                  defaultValue={category}
-                  className="w-full rounded-lg border border-[#344459] bg-[#101B2B] px-3 py-3 text-sm text-slate-300 outline-none focus:border-emerald-500"
-                >
-                  <option value="">All Categories</option>
-
-                  {categories.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="mb-3 block text-sm font-medium">
-                  Location
-                </label>
-
-                <div className="flex items-center rounded-lg border border-[#344459] bg-[#101B2B] px-3">
-                  <MapPin size={17} className="text-slate-500" />
-
-                  <input
-                    name="location"
-                    defaultValue={location}
-                    placeholder="Enter location"
-                    className="w-full bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-500"
-                  />
-                </div>
-              </div>
-
-              {/* Job Type */}
-              <div>
-                <label className="mb-3 block text-sm font-medium">
-                  Job Type
-                </label>
-
-                <select
-                  name="type"
-                  defaultValue={type}
-                  className="w-full rounded-lg border border-[#344459] bg-[#101B2B] px-3 py-3 text-sm text-slate-300 outline-none focus:border-emerald-500"
-                >
-                  <option value="">All Types</option>
-                  <option value="Full Time">Full Time</option>
-                  <option value="Part Time">Part Time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Internship">Internship</option>
-                </select>
-              </div>
-
-              {/* Workplace */}
-              <div>
-                <label className="mb-3 block text-sm font-medium">
-                  Workplace
-                </label>
-
-                <select
-                  name="workplace"
-                  defaultValue={workplace}
-                  className="w-full rounded-lg border border-[#344459] bg-[#101B2B] px-3 py-3 text-sm text-slate-300 outline-none focus:border-emerald-500"
-                >
-                  <option value="">All Workplaces</option>
-                  <option value="Remote">Remote</option>
-                  <option value="On-site">On-site</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
-              </div>
-
-              {/* Skills */}
-              <div>
-                <label className="mb-3 block text-sm font-medium">
-                  Skills / Requirements
-                </label>
-
-                <input
-                  name="requirements"
-                  defaultValue={requirements}
-                  placeholder="e.g. React, Node.js"
-                  className="w-full rounded-lg border border-[#344459] bg-[#101B2B] px-3 py-3 text-sm outline-none placeholder:text-slate-500 focus:border-emerald-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full rounded-lg bg-emerald-600 py-3 font-semibold transition hover:bg-emerald-700"
-              >
-                Apply Filters
-              </button>
-            </form>
-          </aside>
+          <JobFilters />
 
           {/* Job Listings */}
           <section>
@@ -273,17 +163,25 @@ const jobs = allJobs;
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#344459] pt-4">
+                    <div className="mt-5 flex items-center justify-between border-t border-[#344459] pt-5">
                       <div>
-                        <p className="text-xs text-slate-500">Salary</p>
-                        <p className="mt-1 font-semibold text-emerald-400">
-                          {job.salary || "Not specified"}
+                        <p className="text-xs text-slate-500">
+                          Interested in this role?
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-slate-300">
+                          Explore job details
                         </p>
                       </div>
 
-                      <span className="rounded-md bg-[#101B2B] px-3 py-2 text-xs text-slate-300">
-                        {job.category}
-                      </span>
+                      <Link
+                        href={`/browse-jobs/${job._id}`}
+                        className="group inline-flex items-center gap-2 rounded-lg border border-emerald-500/50 bg-emerald-500/10 px-5 py-2.5 text-sm font-semibold text-emerald-400 transition-all duration-300 hover:border-emerald-500 hover:bg-emerald-600 hover:text-white"
+                      >
+                        View Details
+                        <span className="transition-transform duration-300 group-hover:translate-x-1">
+                          →
+                        </span>
+                      </Link>
                     </div>
                   </div>
                 ))
@@ -306,11 +204,74 @@ const jobs = allJobs;
                 </div>
               )}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[#344459] pt-6 sm:flex-row">
+                <p className="text-sm text-slate-400">
+                  Showing {(currentPage - 1) * 20 + 1} -{" "}
+                  {Math.min(currentPage * 20, totalJobs)} of {totalJobs} jobs
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/browse-jobs?${new URLSearchParams({
+                      ...Object.fromEntries(params.entries()),
+                      page: String(currentPage - 1),
+                    }).toString()}`}
+                    aria-disabled={currentPage === 1}
+                    className={`flex items-center gap-1 rounded-lg border border-[#344459] px-3 py-2 text-sm transition ${
+                      currentPage === 1
+                        ? "pointer-events-none opacity-40"
+                        : "hover:border-emerald-500 hover:bg-emerald-500/10"
+                    }`}
+                  >
+                    <ChevronLeft size={17} />
+                    Previous
+                  </a>
+
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1
+                  ).map((pageNumber) => (
+                    <a
+                      key={pageNumber}
+                      href={`/browse-jobs?${new URLSearchParams({
+                        ...Object.fromEntries(params.entries()),
+                        page: String(pageNumber),
+                      }).toString()}`}
+                      className={`rounded-lg px-3.5 py-2 text-sm font-medium transition ${
+                        currentPage === pageNumber
+                          ? "bg-emerald-600 text-white"
+                          : "border border-[#344459] text-slate-300 hover:border-emerald-500 hover:text-emerald-400"
+                      }`}
+                    >
+                      {pageNumber}
+                    </a>
+                  ))}
+
+                  <a
+                    href={`/browse-jobs?${new URLSearchParams({
+                      ...Object.fromEntries(params.entries()),
+                      page: String(currentPage + 1),
+                    }).toString()}`}
+                    aria-disabled={currentPage === totalPages}
+                    className={`flex items-center gap-1 rounded-lg border border-[#344459] px-3 py-2 text-sm transition ${
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-40"
+                        : "hover:border-emerald-500 hover:bg-emerald-500/10"
+                    }`}
+                  >
+                    Next
+                    <ChevronRight size={17} />
+                  </a>
+                </div>
+              </div>
+            )}
           </section>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BrowseJobs;
+export default BrowseJobs
