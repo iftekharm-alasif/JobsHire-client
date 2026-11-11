@@ -1,13 +1,12 @@
+"use client"
 
-"use client";
-
-import React, { useState } from "react";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState } from "react"
+import Link from "next/link"
+import { authClient } from "@/lib/auth-client"
+import { useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 import {
   User,
@@ -20,53 +19,56 @@ import {
   Building2,
   ArrowRight,
   CheckCircle2,
-} from "lucide-react";
+} from "lucide-react"
 
 const SignUpPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedRole, setSelectedRole] = useState<
-  "seeker" | "recruiter" | "admin"
->("seeker");
+    "seeker" | "recruiter" | "admin"
+  >("seeker")
+  const searchParams = useSearchParams()
+
+  const redirectTo = searchParams.get("redirect")
+
+  const redirectPath =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : "/"
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget)
 
     const { data, error } = await authClient.signUp.email({
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       password: formData.get("password") as string,
       role: selectedRole,
-      callbackURL: "/",
-    });
+      callbackURL: redirectPath,
+    })
 
     if (error) {
-      console.log("Signup Error:", error);
-      alert(error.message || "Signup failed");
-      setIsLoading(false);
-      return;
+      console.log("Signup Error:", error)
+      alert(error.message || "Signup failed")
+      setIsLoading(false)
+      return
     }
 
     if (data) {
-      window.location.href = "/";
+      window.location.href = redirectPath
     }
 
-    setIsLoading(false);
-  };
+    setIsLoading(false)
+  }
 
   return (
-    <section className="min-h-screen bg-[#090a0f] px-4 py-12 text-white flex items-center justify-center">
-
+    <section className="flex min-h-screen items-center justify-center bg-[#090a0f] px-4 py-12 text-white">
       <div className="w-full max-w-lg">
-
         {/* Logo */}
-        <Link
-          href="/"
-          className="mb-8 flex items-center justify-center gap-2"
-        >
+        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
           <div className="rounded-xl bg-indigo-600 p-2.5 shadow-lg shadow-indigo-600/20">
             <BriefcaseBusiness className="h-6 w-6 text-white" />
           </div>
@@ -78,7 +80,6 @@ const SignUpPage = () => {
 
         {/* Signup Card */}
         <div className="rounded-2xl border border-slate-800 bg-[#11131c] p-6 shadow-2xl sm:p-9">
-
           {/* Heading */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10">
@@ -96,15 +97,17 @@ const SignUpPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-slate-200">
+              <Label
+                htmlFor="name"
+                className="text-sm font-medium text-slate-200"
+              >
                 Full Name
               </Label>
 
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <User className="absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="name"
@@ -119,12 +122,15 @@ const SignUpPage = () => {
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-slate-200">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-slate-200"
+              >
                 Email Address
               </Label>
 
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Mail className="absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="email"
@@ -137,104 +143,101 @@ const SignUpPage = () => {
               </div>
             </div>
 
-{/* Role Selection */}
-<div className="space-y-3">
-  <div>
-    <Label className="text-sm font-medium text-slate-200">
-      I want to join as a
-    </Label>
+            {/* Role Selection */}
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-medium text-slate-200">
+                  I want to join as a
+                </Label>
 
-    <p className="mt-1 text-xs text-slate-500">
-      Choose your account type.
-    </p>
-  </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  Choose your account type.
+                </p>
+              </div>
 
-  <div className="grid grid-cols-3 gap-3">
-    {/* Seeker */}
-    <button
-      type="button"
-      onClick={() => setSelectedRole("seeker")}
-      className={`relative rounded-xl border p-3 text-left transition ${
-        selectedRole === "seeker"
-          ? "border-indigo-500 bg-indigo-500/10"
-          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-      }`}
-    >
-      {selectedRole === "seeker" && (
-        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
-      )}
+              <div className="grid grid-cols-3 gap-3">
+                {/* Seeker */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("seeker")}
+                  className={`relative rounded-xl border p-3 text-left transition ${
+                    selectedRole === "seeker"
+                      ? "border-indigo-500 bg-indigo-500/10"
+                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+                  }`}
+                >
+                  {selectedRole === "seeker" && (
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
+                  )}
 
-      <UserRound className="mb-3 h-6 w-6 text-indigo-400" />
+                  <UserRound className="mb-3 h-6 w-6 text-indigo-400" />
 
-      <h3 className="text-sm font-semibold text-white">
-        Job Seeker
-      </h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    Job Seeker
+                  </h3>
 
-      <p className="mt-1 text-xs text-slate-400">
-        Find jobs.
-      </p>
-    </button>
+                  <p className="mt-1 text-xs text-slate-400">Find jobs.</p>
+                </button>
 
-    {/* Recruiter */}
-    <button
-      type="button"
-      onClick={() => setSelectedRole("recruiter")}
-      className={`relative rounded-xl border p-3 text-left transition ${
-        selectedRole === "recruiter"
-          ? "border-indigo-500 bg-indigo-500/10"
-          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-      }`}
-    >
-      {selectedRole === "recruiter" && (
-        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
-      )}
+                {/* Recruiter */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("recruiter")}
+                  className={`relative rounded-xl border p-3 text-left transition ${
+                    selectedRole === "recruiter"
+                      ? "border-indigo-500 bg-indigo-500/10"
+                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+                  }`}
+                >
+                  {selectedRole === "recruiter" && (
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
+                  )}
 
-      <Building2 className="mb-3 h-6 w-6 text-indigo-400" />
+                  <Building2 className="mb-3 h-6 w-6 text-indigo-400" />
 
-      <h3 className="text-sm font-semibold text-white">
-        Recruiter
-      </h3>
+                  <h3 className="text-sm font-semibold text-white">
+                    Recruiter
+                  </h3>
 
-      <p className="mt-1 text-xs text-slate-400">
-        Hire talent.
-      </p>
-    </button>
+                  <p className="mt-1 text-xs text-slate-400">Hire talent.</p>
+                </button>
 
-    {/* Admin */}
-    <button
-      type="button"
-      onClick={() => setSelectedRole("admin")}
-      className={`relative rounded-xl border p-3 text-left transition ${
-        selectedRole === "admin"
-          ? "border-indigo-500 bg-indigo-500/10"
-          : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-      }`}
-    >
-      {selectedRole === "admin" && (
-        <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
-      )}
+                {/* Admin */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("admin")}
+                  className={`relative rounded-xl border p-3 text-left transition ${
+                    selectedRole === "admin"
+                      ? "border-indigo-500 bg-indigo-500/10"
+                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
+                  }`}
+                >
+                  {selectedRole === "admin" && (
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
+                  )}
 
-      <BriefcaseBusiness className="mb-3 h-6 w-6 text-indigo-400" />
+                  <BriefcaseBusiness className="mb-3 h-6 w-6 text-indigo-400" />
 
-      <h3 className="text-sm font-semibold text-white">
-        Admin
-      </h3>
+                  <h3 className="text-sm font-semibold text-white">Admin</h3>
 
-      <p className="mt-1 text-xs text-slate-400">
-        Manage platform.
-      </p>
-    </button>
-  </div>
-</div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Manage platform.
+                  </p>
+                </button>
+              </div>
+            </div>
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-200">
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-slate-200"
+              >
                 Password
               </Label>
 
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Lock className="absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="password"
@@ -243,13 +246,13 @@ const SignUpPage = () => {
                   placeholder="Create a strong password"
                   minLength={8}
                   required
-                  className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pl-11 pr-12 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
+                  className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pr-12 pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+                  className="absolute top-1/2 right-3.5 -translate-y-1/2 text-slate-500 transition hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -283,9 +286,13 @@ const SignUpPage = () => {
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-indigo-400 hover:underline">
+                <Link
+                  href="/privacy"
+                  className="text-indigo-400 hover:underline"
+                >
                   Privacy Policy
-                </Link>.
+                </Link>
+                .
               </Label>
             </div>
 
@@ -304,7 +311,6 @@ const SignUpPage = () => {
                 </span>
               )}
             </Button>
-
           </form>
 
           {/* Divider */}
@@ -351,22 +357,24 @@ const SignUpPage = () => {
           <p className="mt-7 text-center text-sm text-slate-400">
             Already have an account?{" "}
             <Link
-              href="/sign-in"
+              href={
+                redirectPath === "/"
+                  ? "/sign-in"
+                  : `/sign-in?redirect=${encodeURIComponent(redirectPath)}`
+              }
               className="font-semibold text-indigo-400 transition hover:text-indigo-300"
             >
               Sign In
             </Link>
           </p>
-
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-600">
           © 2026 HireLoop. All rights reserved.
         </p>
-
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default SignUpPage;
+export default SignUpPage

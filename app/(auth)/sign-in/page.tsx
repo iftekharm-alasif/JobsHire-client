@@ -1,14 +1,13 @@
+"use client"
 
-"use client";
+import React, { useState } from "react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { authClient } from "@/lib/auth-client"
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 import {
   Mail,
@@ -21,64 +20,67 @@ import {
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
-} from "lucide-react";
+} from "lucide-react"
 
 const SignInPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("seeker");
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedRole, setSelectedRole] = useState("seeker")
 
-  const router = useRouter();
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const redirectTo = searchParams.get("redirect")
+
+  const redirectPath =
+    redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+      ? redirectTo
+      : "/"
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget)
 
     const { data, error } = await authClient.signIn.email({
       email: formData.get("email") as string,
       password: formData.get("password") as string,
       rememberMe: formData.get("remember") === "on",
-    });
+    })
 
     if (error) {
-      alert(error.message || "Sign in failed");
-      setIsLoading(false);
-      return;
+      alert(error.message || "Sign in failed")
+      setIsLoading(false)
+      return
     }
 
     if (data) {
-      const { data: sessionData } = await authClient.getSession();
+      const { data: sessionData } = await authClient.getSession()
 
-      const actualRole = sessionData?.user?.role;
+      const actualRole = sessionData?.user?.role
 
       if (selectedRole !== actualRole) {
-        await authClient.signOut();
+        await authClient.signOut()
 
-        alert("Your selected role does not match your account role.");
+        alert("Your selected role does not match your account role.")
 
-        setIsLoading(false);
-        return;
+        setIsLoading(false)
+        return
       }
 
-      router.push("/");
-      router.refresh();
+      router.push(redirectPath)
+      router.refresh()
     }
 
-    setIsLoading(false);
-  };
+    setIsLoading(false)
+  }
 
   return (
     <section className="flex min-h-screen items-center justify-center bg-[#090a0f] px-4 py-12 text-white">
-
       <div className="w-full max-w-lg">
-
         {/* Logo */}
-        <Link
-          href="/"
-          className="mb-8 flex items-center justify-center gap-2"
-        >
+        <Link href="/" className="mb-8 flex items-center justify-center gap-2">
           <div className="rounded-xl bg-indigo-600 p-2.5 shadow-lg shadow-indigo-600/20">
             <BriefcaseBusiness className="h-6 w-6 text-white" />
           </div>
@@ -90,37 +92,33 @@ const SignInPage = () => {
 
         {/* Sign In Card */}
         <div className="rounded-2xl border border-slate-800 bg-[#11131c] p-6 shadow-2xl sm:p-9">
-
           {/* Heading */}
           <div className="mb-8 text-center">
-
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10">
               <UserRound className="h-7 w-7 text-indigo-400" />
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight">
-              Welcome Back!
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">Welcome Back!</h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Sign in to your HireLoop account and continue your professional journey.
+              Sign in to your HireLoop account and continue your professional
+              journey.
             </p>
-
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-
             {/* Email */}
             <div className="space-y-2">
-
-              <Label htmlFor="email" className="text-sm font-medium text-slate-200">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-slate-200"
+              >
                 Email Address
               </Label>
 
               <div className="relative">
-
-                <Mail className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Mail className="absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="email"
@@ -130,13 +128,11 @@ const SignInPage = () => {
                   required
                   className="h-12 rounded-xl border-slate-800 bg-[#090a0f] pl-11 text-white placeholder:text-slate-500 focus-visible:ring-indigo-500"
                 />
-
               </div>
             </div>
 
             {/* Role Selection */}
             <div className="space-y-3">
-
               <div>
                 <Label className="text-sm font-medium text-slate-200">
                   Sign in as
@@ -148,7 +144,6 @@ const SignInPage = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-
                 {/* Seeker */}
                 <button
                   type="button"
@@ -160,7 +155,7 @@ const SignInPage = () => {
                   }`}
                 >
                   {selectedRole === "seeker" && (
-                    <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
                   )}
 
                   <UserRound className="h-6 w-6 text-indigo-400" />
@@ -181,7 +176,7 @@ const SignInPage = () => {
                   }`}
                 >
                   {selectedRole === "recruiter" && (
-                    <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
                   )}
 
                   <Building2 className="h-6 w-6 text-indigo-400" />
@@ -202,7 +197,7 @@ const SignInPage = () => {
                   }`}
                 >
                   {selectedRole === "admin" && (
-                    <CheckCircle2 className="absolute right-2 top-2 h-4 w-4 text-indigo-400" />
+                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
                   )}
 
                   <ShieldCheck className="h-6 w-6 text-indigo-400" />
@@ -211,16 +206,16 @@ const SignInPage = () => {
                     Admin
                   </span>
                 </button>
-
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-2">
-
               <div className="flex items-center justify-between">
-
-                <Label htmlFor="password" className="text-sm font-medium text-slate-200">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-slate-200"
+                >
                   Password
                 </Label>
 
@@ -230,12 +225,10 @@ const SignInPage = () => {
                 >
                   Forgot Password?
                 </Link>
-
               </div>
 
               <div className="relative">
-
-                <Lock className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+                <Lock className="absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-slate-500" />
 
                 <Input
                   id="password"
@@ -249,7 +242,7 @@ const SignInPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+                  className="absolute top-1/2 right-3.5 -translate-y-1/2 text-slate-500 transition hover:text-white"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -258,13 +251,11 @@ const SignInPage = () => {
                     <Eye className="h-5 w-5" />
                   )}
                 </button>
-
               </div>
             </div>
 
             {/* Remember Me */}
             <div className="flex items-center gap-3 pt-1">
-
               <input
                 type="checkbox"
                 id="remember"
@@ -275,7 +266,6 @@ const SignInPage = () => {
               <Label htmlFor="remember" className="text-sm text-slate-400">
                 Remember me
               </Label>
-
             </div>
 
             {/* Submit */}
@@ -293,12 +283,10 @@ const SignInPage = () => {
                 </span>
               )}
             </Button>
-
           </form>
 
           {/* Divider */}
           <div className="relative my-7">
-
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-slate-800" />
             </div>
@@ -308,7 +296,6 @@ const SignInPage = () => {
                 Or continue with
               </span>
             </div>
-
           </div>
 
           {/* Google Button */}
@@ -335,31 +322,32 @@ const SignInPage = () => {
                 d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
               />
             </svg>
-
             Continue with Google
           </Button>
 
           {/* Sign Up */}
           <p className="mt-7 text-center text-sm text-slate-400">
-            Don't have an account?{" "}
+            Dont have an account?{" "}
             <Link
-              href="/sign-up"
+              href={
+                redirectPath === "/"
+                  ? "/sign-up"
+                  : `/sign-up?redirect=${encodeURIComponent(redirectPath)}`
+              }
               className="font-semibold text-indigo-400 transition hover:text-indigo-300"
             >
               Create Account
             </Link>
           </p>
-
         </div>
 
         {/* Footer */}
         <p className="mt-6 text-center text-xs text-slate-600">
           © 2026 HireLoop. All rights reserved.
         </p>
-
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default SignInPage;
+export default SignInPage
