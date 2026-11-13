@@ -58,7 +58,7 @@ const AddJobPage = () => {
 
       setTimeout(() => {
         router.push("/dashboard/recruiter/jobs")
-      }, 1000)
+      }, 1500)
     } catch (error) {
       toast.error("Failed to publish job!")
       console.log(error)

@@ -1,3 +1,4 @@
+
 import { betterAuth } from "better-auth"
 import { MongoClient } from "mongodb"
 import { mongodbAdapter } from "@better-auth/mongo-adapter"
@@ -18,6 +19,28 @@ export const auth = betterAuth({
         required: true,
         defaultValue: "seeker",
         input: true,
+      },
+      plan: {
+        type: "string",
+        required: true,
+        defaultValue: "free",
+        input: false,
+      },
+      subscriptionStatus: {
+        type: "string",
+        required: true,
+        defaultValue: "inactive",
+        input: false,
+      },
+      stripeCustomerId: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+      stripeSubscriptionId: {
+        type: "string",
+        required: false,
+        input: false,
       },
     },
   },

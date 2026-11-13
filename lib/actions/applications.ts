@@ -1,13 +1,14 @@
+
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000"
 
 export const applyToAJob = async (data: {
-  jobId: string;
-  applicantName: string;
-  applicantEmail: string;
-  phone: string;
-  resume: string;
-  coverLetter: string;
+  jobId: string
+  applicantName: string
+  applicantEmail: string
+  phone: string
+  resume: string
+  coverLetter: string
 }) => {
   try {
     const res = await fetch(`${BASE_URL}/applications`, {
@@ -16,35 +17,33 @@ export const applyToAJob = async (data: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    });
+    })
 
-    const result = await res.json();
+    const result = await res.json()
 
     if (res.status === 403) {
-      throw new Error(
-        "Application limit reached! You can apply for a maximum of 10 jobs."
-      );
+      throw new Error("LIMIT_REACHED")
     }
 
     if (res.status === 409) {
-      throw new Error("You have already applied for this job.");
+      throw new Error("You have already applied for this job.")
     }
 
     if (!res.ok) {
       throw new Error(
-        result.message || "Failed to submit application. Please try again."
-      );
+        result.message || "Failed to submit application."
+      )
     }
 
-    return result;
+    return result
   } catch (error) {
     if (error instanceof TypeError) {
-      throw new Error("Cannot connect to server. Please try again.");
+      throw new Error("Cannot connect to server. Please try again.")
     }
 
-    throw error;
+    throw error
   }
-};
+}
 
 export const getMyApplications = async (email: string) => {
   try {
@@ -53,15 +52,15 @@ export const getMyApplications = async (email: string) => {
       {
         cache: "no-store",
       }
-    );
+    )
 
     if (!res.ok) {
-      throw new Error("Failed to fetch applications");
+      throw new Error(`Failed to fetch applications: ${res.status}`)
     }
 
-    return await res.json();
+    return await res.json()
   } catch (error) {
-    console.error("Get applications error:", error);
-    throw error;
+    console.error("Get applications error:", error)
+    throw error
   }
-};
+}

@@ -68,46 +68,37 @@ const ApplyJobPage = () => {
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
 
-    setIsSubmitting(true)
+  setIsSubmitting(true)
 
-    try {
-      await applyToAJob({
-        jobId,
-        ...formData,
-      })
+  try {
+    await applyToAJob({
+      jobId,
+      ...formData,
+    })
 
-      toast.success("Your job application has been submitted successfully!")
+    toast.success("Your job application has been submitted successfully!")
 
-      router.push("/browse-jobs")
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Something went wrong."
+    router.push("/browse-jobs")
+  } catch (error) {
+    if (error instanceof Error && error.message === "LIMIT_REACHED") {
+      toast.error("Application limit reached! Please upgrade your plan.")
 
-      if (message.includes("Application limit reached") || message === "LIMIT_REACHED") {
-        toast.error(
-          "Application Limit Reached! You can submit a maximum of 10 applications."
-        )
-        // router.push("/dashboard/seeker/billing")
-      } else if (message.includes("already applied")) {
-        toast.error("You have already applied for this job!")
-      } else {
-        toast.error(message || "Failed to submit your application. Please try again.")
-      }
-    } finally {
-      setIsSubmitting(false)
+      router.push("/dashboard/seeker/billing")
+      return
     }
-  }
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#101B2B] text-slate-300">
-        Verifying your account...
-      </div>
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Failed to submit your application. Please try again."
     )
+  } finally {
+    setIsSubmitting(false)
   }
+}
 
   return (
     <section className="min-h-screen bg-[#101B2B] px-4 py-12 text-white">

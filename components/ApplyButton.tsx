@@ -53,13 +53,14 @@ const ApplyButton = ({ jobId }: { jobId: string }) => {
 
       const applications = await getMyApplications(user.email)
 
-      if (applications.length >= 10) {
-        toast.error(
-          "Application Limit Reached! You have already submitted 10 applications."
-        )
-        return
-      }
+if (applications.length >= 10) {
+  toast.error(
+    "Application Limit Reached! Please upgrade your plan."
+  )
 
+  router.push("/dashboard/seeker/billing")
+  return
+}
       const alreadyApplied = applications.some(
         (application: { jobId: string }) =>
           String(application.jobId) === String(jobId)
