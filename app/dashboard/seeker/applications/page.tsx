@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -20,6 +19,8 @@ import { toast } from "sonner"
 type Application = {
   _id: string
   jobId: string
+  jobTitle?: string
+  company?: string
   applicantName: string
   applicantEmail: string
   phone: string
@@ -79,7 +80,6 @@ export default function ApplicationsPage() {
   return (
     <div className="min-h-screen bg-[#101B2B] px-4 py-8 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div>
@@ -129,13 +129,13 @@ export default function ApplicationsPage() {
               </div>
             </div>
             <h2 className="mt-3 text-3xl font-bold">
-              {applications.filter(
-                (app) => !app.status || app.status.toLowerCase() === "pending"
-              ).length}
+              {
+                applications.filter(
+                  (app) => !app.status || app.status.toLowerCase() === "pending"
+                ).length
+              }
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Waiting for review
-            </p>
+            <p className="mt-1 text-xs text-slate-500">Waiting for review</p>
           </div>
 
           <div className="rounded-2xl border border-[#344459] bg-[#172538] p-5">
@@ -146,13 +146,13 @@ export default function ApplicationsPage() {
               </div>
             </div>
             <h2 className="mt-3 text-3xl font-bold">
-              {applications.filter(
-                (app) => app.status?.toLowerCase() === "reviewed"
-              ).length}
+              {
+                applications.filter(
+                  (app) => app.status?.toLowerCase() === "reviewed"
+                ).length
+              }
             </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Applications reviewed
-            </p>
+            <p className="mt-1 text-xs text-slate-500">Applications reviewed</p>
           </div>
         </div>
 
@@ -176,9 +176,7 @@ export default function ApplicationsPage() {
               <FileText size={30} />
             </div>
 
-            <h3 className="text-lg font-semibold">
-              No applications yet
-            </h3>
+            <h3 className="text-lg font-semibold">No applications yet</h3>
 
             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-400">
               You haven't applied for any jobs. Explore available opportunities
@@ -207,11 +205,16 @@ export default function ApplicationsPage() {
                     </div>
 
                     <div>
-                      <h3 className="font-semibold text-white">
-                        {application.applicantName}
+                      <h3 className="text-lg font-bold text-white">
+                        {application.jobTitle || "Job Title Not Available"}
                       </h3>
+
+                      <p className="mt-1 text-sm font-medium text-emerald-400">
+                        {application.company || "Company Not Available"}
+                      </p>
+
                       <p className="mt-1 text-xs text-slate-400">
-                        Job Application
+                        Applied by {application.applicantName}
                       </p>
                     </div>
                   </div>
@@ -230,7 +233,9 @@ export default function ApplicationsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-slate-300">
                     <Mail size={16} className="shrink-0 text-slate-500" />
-                    <span className="truncate">{application.applicantEmail}</span>
+                    <span className="truncate">
+                      {application.applicantEmail}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-3 text-sm text-slate-300">
@@ -239,7 +244,7 @@ export default function ApplicationsPage() {
                   </div>
 
                   <div className="rounded-xl bg-[#101B2B] p-4">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <p className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
                       Cover Letter
                     </p>
                     <p className="line-clamp-3 text-sm leading-6 text-slate-300">

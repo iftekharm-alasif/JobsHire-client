@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { Send } from "lucide-react"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
+import { getMyApplications } from "@/lib/actions/applications"
 
 const ApplyButton = ({ jobId }: { jobId: string }) => {
   const router = useRouter()
@@ -26,11 +27,12 @@ const ApplyButton = ({ jobId }: { jobId: string }) => {
         return
       }
 
-      const userRole = sessionData.user.role
+      const user = sessionData.user
+      const userRole = user.role
 
       if (userRole === "recruiter") {
         toast.error(
-          "Recruiters cannot apply for jobs. Please sign in with a job seeker account."
+          "Recruiters cannot apply for jobs. Please use a job seeker account."
         )
         return
       }
@@ -49,10 +51,31 @@ const ApplyButton = ({ jobId }: { jobId: string }) => {
         return
       }
 
+      const applications = await getMyApplications(user.email)
+
+      if (applications.length >= 10) {
+        toast.error(
+          "Application Limit Reached! You have already submitted 10 applications."
+        )
+        return
+      }
+
+      const alreadyApplied = applications.some(
+        (application: { jobId: string }) =>
+          String(application.jobId) === String(jobId)
+      )
+
+      if (alreadyApplied) {
+        toast.error("You have already applied for this job!")
+        return
+      }
+
       router.push(`/apply-job/${jobId}`)
     } catch (error) {
       toast.error(
-        "We couldn't verify your account. Please try again."
+        error instanceof Error
+          ? error.message
+          : "We couldn't verify your account. Please try again."
       )
     } finally {
       setIsLoading(false)
@@ -63,7 +86,7 @@ const ApplyButton = ({ jobId }: { jobId: string }) => {
     <button
       onClick={handleApply}
       disabled={isLoading}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isLoading ? "Please wait..." : "Apply Now"}
       {!isLoading && <Send size={17} />}

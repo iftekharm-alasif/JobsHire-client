@@ -20,41 +20,64 @@ const SearchBar = ({ defaultValue = "" }: { defaultValue?: string }) => {
   const [search, setSearch] = useState(defaultValue);
   const [suggestions, setSuggestions] = useState<Job[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (!search.trim()) {
       setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
+    const controller = new AbortController();
+
     const timer = setTimeout(async () => {
       try {
+        setSearching(true);
+
         const res = await fetch(
-          `${BASE_URL}/jobs?search=${encodeURIComponent(search)}`
+          `${BASE_URL}/jobs?search=${encodeURIComponent(search)}`,
+          { signal: controller.signal }
         );
 
-        if (!res.ok) return;
+        if (!res.ok) {
+          throw new Error("Failed to fetch suggestions");
+        }
 
-        const data: Job[] = await res.json();
+        const data = await res.json();
 
-        setSuggestions(data.slice(0, 5));
+        const jobs: Job[] = Array.isArray(data)
+          ? data
+          : data.jobs || [];
+
+        setSuggestions(jobs.slice(0, 5));
         setShowSuggestions(true);
       } catch (error) {
-        console.log("Suggestion error:", error);
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("Suggestion error:", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSearching(false);
+        }
       }
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [search]);
 
   const handleSearch = (value: string) => {
+    setShowSuggestions(false);
+
     if (!value.trim()) {
       router.push("/browse-jobs");
       return;
     }
 
-    router.push(`/browse-jobs?search=${encodeURIComponent(value)}`);
-    setShowSuggestions(false);
+    router.push(`/browse-jobs?search=${encodeURIComponent(value.trim())}`);
   };
 
   return (
@@ -73,7 +96,12 @@ const SearchBar = ({ defaultValue = "" }: { defaultValue?: string }) => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
+            onFocus={() => {
+              if (search.trim()) setShowSuggestions(true);
+            }}
+            onBlur={() => {
+              setTimeout(() => setShowSuggestions(false), 150);
+            }}
             placeholder="Job title or company name..."
             className="w-full bg-transparent py-3 text-sm text-white outline-none placeholder:text-slate-500"
           />
@@ -89,11 +117,16 @@ const SearchBar = ({ defaultValue = "" }: { defaultValue?: string }) => {
 
       {showSuggestions && search.trim() && (
         <div className="absolute left-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-[#344459] bg-[#172538] shadow-xl">
-          {suggestions.length > 0 ? (
+          {searching ? (
+            <p className="px-5 py-4 text-sm text-slate-400">
+              Searching...
+            </p>
+          ) : suggestions.length > 0 ? (
             suggestions.map((job) => (
               <button
                 key={job._id}
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   setSearch(job.title);
                   handleSearch(job.title);

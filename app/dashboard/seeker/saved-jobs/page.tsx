@@ -220,7 +220,14 @@ export default function SavedJobsPage() {
               You haven't saved any jobs. Explore opportunities and bookmark the
               jobs you like.
             </p>
-            <Link href={`/browse-jobs/${job._id}`}>View Details</Link>
+
+            <Link
+              href="/browse-jobs"
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              Browse Jobs
+              <ExternalLink size={15} />
+            </Link>
           </div>
         )}
       </div>

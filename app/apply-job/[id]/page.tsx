@@ -83,11 +83,19 @@ const ApplyJobPage = () => {
 
       router.push("/browse-jobs")
     } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to submit your application. Please try again."
-      )
+      const message =
+        error instanceof Error ? error.message : "Something went wrong."
+
+      if (message.includes("Application limit reached") || message === "LIMIT_REACHED") {
+        toast.error(
+          "Application Limit Reached! You can submit a maximum of 10 applications."
+        )
+        // router.push("/dashboard/seeker/billing")
+      } else if (message.includes("already applied")) {
+        toast.error("You have already applied for this job!")
+      } else {
+        toast.error(message || "Failed to submit your application. Please try again.")
+      }
     } finally {
       setIsSubmitting(false)
     }
