@@ -8,18 +8,20 @@ import {
   MapPin,
   CalendarDays,
   Users,
-  Pencil,
   BriefcaseBusiness,
   CheckCircle2,
   Clock,
   FileText,
 } from "lucide-react"
 
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { getJobs } from "@/lib/api/jobs"
+import { getJobs, deleteJob } from "@/lib/actions/jobs"
 import { DeleteJobDialog } from "@/components/DeleteJobDialog"
+import { authClient } from "@/lib/auth-client"
+import { getRecruiterJobs } from "@/lib/actions/jobs"
 
 type Job = {
   _id: string
@@ -27,7 +29,7 @@ type Job = {
   company: string
   category: string
   location: string
-  type: string
+  type?: string
   jobType?: string
   workplace: string
   salary: string
@@ -36,33 +38,65 @@ type Job = {
   deadline: string
 }
 
+type JobsResponse = {
+  jobs: Job[]
+  totalJobs: number
+  totalPages: number
+  currentPage: number
+}
+
 const ManageJobsPage = () => {
   const [jobs, setJobs] = useState<Job[]>([])
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("All")
   const [loading, setLoading] = useState(true)
-
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalJobs, setTotalJobs] = useState(0)
+  const { data: session, isPending } = authClient.useSession()
   useEffect(() => {
     const fetchJobs = async () => {
+      if (isPending) return
+
+      if (!session?.user?.id) {
+        setJobs([])
+        setTotalJobs(0)
+        setTotalPages(1)
+        return
+      }
+
       try {
-        const data = await getJobs()
-        setJobs(Array.isArray(data) ? data.reverse() : [])
+        setLoading(true)
+
+        const data = await getRecruiterJobs(currentPage, session.user.id)
+
+        setJobs(data.jobs || [])
+        setTotalJobs(data.totalJobs || 0)
+        setTotalPages(data.totalPages || 1)
       } catch (error) {
-        console.error("Failed to fetch jobs:", error)
+        console.error("Fetch Recruiter Jobs Error:", error)
+        toast.error("Failed to load your jobs")
       } finally {
         setLoading(false)
       }
     }
 
     fetchJobs()
-  }, [])
+  }, [currentPage, session?.user?.id, isPending])
 
-  // Remove deleted job from the UI
   const handleJobDeleted = (id: string) => {
     setJobs((prev) => prev.filter((job) => job._id !== id))
+    setTotalJobs((prev) => Math.max(0, prev - 1))
+
+    // Move to previous page if the current page becomes empty
+    if (jobs.length === 1 && currentPage > 1) {
+      setCurrentPage((prev) => prev - 1)
+    } else {
+      // Refresh the current page
+      setCurrentPage((prev) => prev)
+    }
   }
 
-  // Search and filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -73,9 +107,6 @@ const ManageJobsPage = () => {
 
     return matchesSearch && matchesFilter
   })
-
-  // Calculate statistics
-  const totalJobs = jobs.length
 
   const activeJobs = jobs.filter(
     (job) => (job.status || "Active") === "Active"
@@ -114,6 +145,21 @@ const ManageJobsPage = () => {
       color: "text-purple-400",
     },
   ]
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setCurrentPage(1)
+  }
+
+  const handleFilterChange = (value: string) => {
+    setFilter(value)
+    setCurrentPage(1)
+  }
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return
+    setCurrentPage(page)
+  }
 
   return (
     <div className="min-h-screen space-y-8 bg-[#101B2B] p-4 text-white sm:p-6 lg:p-8">
@@ -169,7 +215,7 @@ const ManageJobsPage = () => {
             <Input
               placeholder="Search by job title or company..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="border-[#344459] bg-[#101B2B] pl-10 text-white placeholder:text-slate-500"
             />
           </div>
@@ -180,7 +226,7 @@ const ManageJobsPage = () => {
               <Button
                 key={item}
                 size="sm"
-                onClick={() => setFilter(item)}
+                onClick={() => handleFilterChange(item)}
                 className={
                   filter === item
                     ? "bg-emerald-600 text-white hover:bg-emerald-700"
@@ -267,15 +313,28 @@ const ManageJobsPage = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/dashboard/recruiter/jobs/${job._id}/edit`}>
                       <Button
-                        size="sm"
                         variant="outline"
-                        className="border-[#344459] bg-transparent text-slate-300 hover:bg-[#26384D] hover:text-white"
+                        size="sm"
+                        onClick={() => handleEditApplicant(applicant)}
+                        className="border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100"
                       >
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
+                      </Button>
+                    </Link>
+
+                    <Link
+                      href={`/dashboard/recruiter/jobs/${job._id}/applications`}
+                    >
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 text-white hover:bg-emerald-700"
+                      >
+                        <Users className="mr-2 h-4 w-4" />
+                        Applicants ({job.applications || 0})
                       </Button>
                     </Link>
 
@@ -298,9 +357,49 @@ const ManageJobsPage = () => {
         </div>
       </div>
 
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="border-[#344459] bg-transparent text-white hover:bg-[#26384D]"
+          >
+            Previous
+          </Button>
+
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+            (page) => (
+              <Button
+                key={page}
+                variant="outline"
+                onClick={() => handlePageChange(page)}
+                className={
+                  currentPage === page
+                    ? "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border-[#344459] bg-transparent text-white hover:bg-[#26384D]"
+                }
+              >
+                {page}
+              </Button>
+            )
+          )}
+
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="border-[#344459] bg-transparent text-white hover:bg-[#26384D]"
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
       {/* Results Count */}
-      <p className="text-sm text-slate-500">
-        Showing {filteredJobs.length} of {totalJobs} jobs
+      <p className="text-center text-sm text-slate-500">
+        Showing {filteredJobs.length} jobs on this page · {totalJobs} total jobs
       </p>
     </div>
   )

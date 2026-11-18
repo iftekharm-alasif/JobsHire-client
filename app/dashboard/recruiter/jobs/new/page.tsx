@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -24,12 +25,16 @@ import {
 } from "@/components/ui/select"
 
 import { createJob } from "@/lib/actions/jobs"
+import { authClient } from "@/lib/auth-client"
 
 const AddJobPage = () => {
   const router = useRouter()
+
+  const { data: session, isPending } = authClient.useSession()
+
   const [loading, setLoading] = useState(false)
 
-  const [form, setForm] = useState({
+  const initialForm = {
     title: "",
     company: "",
     category: "",
@@ -40,7 +45,9 @@ const AddJobPage = () => {
     deadline: "",
     description: "",
     requirements: "",
-  })
+  }
+
+  const [form, setForm] = useState(initialForm)
 
   const updateForm = (name: string, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -49,10 +56,26 @@ const AddJobPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (isPending) {
+      return
+    }
+
+    if (!session?.user) {
+      toast.error("Please login first")
+      return
+    }
+
     try {
       setLoading(true)
 
-      await createJob(form)
+      const jobData = {
+        ...form,
+        recruiterId: session.user.id,
+        recruiterName: session.user.name,
+        recruiterEmail: session.user.email,
+      }
+
+      await createJob(jobData)
 
       toast.success("Job published successfully!")
 
@@ -60,8 +83,13 @@ const AddJobPage = () => {
         router.push("/dashboard/recruiter/jobs")
       }, 1500)
     } catch (error) {
-      toast.error("Failed to publish job!")
-      console.log(error)
+      console.error("Publish Job Error:", error)
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to publish job"
+      )
     } finally {
       setLoading(false)
     }
@@ -75,9 +103,11 @@ const AddJobPage = () => {
           <p className="mb-2 text-sm text-emerald-400">
             Recruiter Dashboard / Jobs
           </p>
+
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             Create a New Job
           </h1>
+
           <p className="mt-2 text-sm text-slate-400">
             Fill in the details below to publish a new job opportunity.
           </p>
@@ -90,6 +120,7 @@ const AddJobPage = () => {
               <div className="rounded-lg bg-emerald-500/10 p-2">
                 <BriefcaseBusiness className="h-5 w-5 text-emerald-400" />
               </div>
+
               <div>
                 <h2 className="font-semibold">Basic Information</h2>
                 <p className="text-xs text-slate-400">
@@ -134,6 +165,7 @@ const AddJobPage = () => {
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
+
                   <SelectContent>
                     {[
                       "Software Development",
@@ -174,6 +206,7 @@ const AddJobPage = () => {
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
                     <SelectValue placeholder="Select job type" />
                   </SelectTrigger>
+
                   <SelectContent>
                     {[
                       "Full time",
@@ -197,8 +230,11 @@ const AddJobPage = () => {
               <div className="rounded-lg bg-emerald-500/10 p-2">
                 <MapPin className="h-5 w-5 text-emerald-400" />
               </div>
+
               <div>
-                <h2 className="font-semibold">Location & Compensation</h2>
+                <h2 className="font-semibold">
+                  Location & Compensation
+                </h2>
                 <p className="text-xs text-slate-400">
                   Where and how will the candidate work?
                 </p>
@@ -216,6 +252,7 @@ const AddJobPage = () => {
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
                     <SelectValue placeholder="Select workplace" />
                   </SelectTrigger>
+
                   <SelectContent>
                     {["On-site", "Remote", "Hybrid"].map((item) => (
                       <SelectItem key={item} value={item}>
@@ -258,8 +295,11 @@ const AddJobPage = () => {
               <div className="rounded-lg bg-emerald-500/10 p-2">
                 <CalendarDays className="h-5 w-5 text-emerald-400" />
               </div>
+
               <div>
-                <h2 className="font-semibold">Timeline & Description</h2>
+                <h2 className="font-semibold">
+                  Timeline & Description
+                </h2>
                 <p className="text-xs text-slate-400">
                   Set the deadline and explain the opportunity.
                 </p>
@@ -312,27 +352,14 @@ const AddJobPage = () => {
               variant="outline"
               disabled={loading}
               className="border-[#344459] bg-transparent text-slate-300 hover:bg-[#172538] hover:text-white"
-              onClick={() =>
-                setForm({
-                  title: "",
-                  company: "",
-                  category: "",
-                  jobType: "",
-                  workplace: "",
-                  location: "",
-                  salary: "",
-                  deadline: "",
-                  description: "",
-                  requirements: "",
-                })
-              }
+              onClick={() => setForm(initialForm)}
             >
               Clear Form
             </Button>
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || isPending}
               className="bg-emerald-600 px-8 text-white hover:bg-emerald-700"
             >
               {loading ? "Publishing..." : "Publish Job"}

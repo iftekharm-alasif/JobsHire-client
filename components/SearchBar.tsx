@@ -23,6 +23,12 @@ const SearchBar = ({ defaultValue = "" }: { defaultValue?: string }) => {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
+  if (search === "" && defaultValue !== "") {
+    router.replace("/browse-jobs");
+  }
+}, [search, defaultValue, router]);
+
+  useEffect(() => {
     if (!search.trim()) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -69,16 +75,18 @@ const SearchBar = ({ defaultValue = "" }: { defaultValue?: string }) => {
     };
   }, [search]);
 
-  const handleSearch = (value: string) => {
-    setShowSuggestions(false);
+const handleSearch = (value: string) => {
+  setShowSuggestions(false);
 
-    if (!value.trim()) {
-      router.push("/browse-jobs");
-      return;
-    }
+  if (!value.trim()) {
+    setSearch("");
+    setSuggestions([]);
+    router.replace("/browse-jobs");
+    return;
+  }
 
-    router.push(`/browse-jobs?search=${encodeURIComponent(value.trim())}`);
-  };
+  router.push(`/browse-jobs?search=${encodeURIComponent(value.trim())}`);
+};
 
   return (
     <div className="relative mb-10">
