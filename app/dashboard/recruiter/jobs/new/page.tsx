@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -70,9 +69,9 @@ const AddJobPage = () => {
 
       const jobData = {
         ...form,
-        recruiterId: session.user.id,
-        recruiterName: session.user.name,
-        recruiterEmail: session.user.email,
+        recruiterId: session.user.id || "",
+        recruiterName: session.user.name || "",
+        recruiterEmail: session.user.email || "",
       }
 
       await createJob(jobData)
@@ -86,9 +85,7 @@ const AddJobPage = () => {
       console.error("Publish Job Error:", error)
 
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to publish job"
+        error instanceof Error ? error.message : "Failed to publish job"
       )
     } finally {
       setLoading(false)
@@ -159,7 +156,7 @@ const AddJobPage = () => {
                 <Label>Job Category</Label>
                 <Select
                   value={form.category}
-                  onValueChange={(value) => updateForm("category", value)}
+                  onValueChange={(value) => updateForm("category", value ?? "")}
                   required
                 >
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
@@ -200,7 +197,7 @@ const AddJobPage = () => {
                 <Label>Job Type</Label>
                 <Select
                   value={form.jobType}
-                  onValueChange={(value) => updateForm("jobType", value)}
+                  onValueChange={(value) => updateForm("jobType", value ?? "")}
                   required
                 >
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
@@ -208,16 +205,13 @@ const AddJobPage = () => {
                   </SelectTrigger>
 
                   <SelectContent>
-                    {[
-                      "Full time",
-                      "Part time",
-                      "Internship",
-                      "Contract",
-                    ].map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
-                      </SelectItem>
-                    ))}
+                    {["Full time", "Part time", "Internship", "Contract"].map(
+                      (item) => (
+                        <SelectItem key={item} value={item}>
+                          {item}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -232,9 +226,7 @@ const AddJobPage = () => {
               </div>
 
               <div>
-                <h2 className="font-semibold">
-                  Location & Compensation
-                </h2>
+                <h2 className="font-semibold">Location & Compensation</h2>
                 <p className="text-xs text-slate-400">
                   Where and how will the candidate work?
                 </p>
@@ -246,7 +238,9 @@ const AddJobPage = () => {
                 <Label>Workplace Type</Label>
                 <Select
                   value={form.workplace}
-                  onValueChange={(value) => updateForm("workplace", value)}
+                  onValueChange={(value) =>
+                    updateForm("workplace", value ?? "")
+                  }
                   required
                 >
                   <SelectTrigger className="border-[#344459] bg-[#101B2B] text-white">
@@ -297,9 +291,7 @@ const AddJobPage = () => {
               </div>
 
               <div>
-                <h2 className="font-semibold">
-                  Timeline & Description
-                </h2>
+                <h2 className="font-semibold">Timeline & Description</h2>
                 <p className="text-xs text-slate-400">
                   Set the deadline and explain the opportunity.
                 </p>
@@ -312,7 +304,7 @@ const AddJobPage = () => {
                 <Input
                   required
                   type="date"
-                  min={new Date().toISOString().split("T")[0]}
+                  min={new Date().toISOString().split("T")[0] || ""}
                   value={form.deadline}
                   onChange={(e) => updateForm("deadline", e.target.value)}
                   className="border-[#344459] bg-[#101B2B] text-white"

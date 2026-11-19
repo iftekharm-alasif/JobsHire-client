@@ -13,8 +13,8 @@ import {
   Clock,
   FileText,
 } from "lucide-react"
-
-import { Pencil } from "lucide-react";
+import { toast } from "sonner"
+import { Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -318,7 +318,6 @@ const ManageJobsPage = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEditApplicant(applicant)}
                         className="border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100"
                       >
                         <Pencil className="mr-2 h-4 w-4" />

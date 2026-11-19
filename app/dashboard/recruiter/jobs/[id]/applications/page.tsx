@@ -98,7 +98,7 @@ const ApplicantsPage = () => {
 
   const handleReview = async (
     applicationId: string,
-    status: "Accepted" | "Rejected"
+    status: "Shortlisted" | "Rejected"
   ) => {
     if (!recruiterId) return
 
@@ -234,7 +234,7 @@ const ApplicantsPage = () => {
 
                       <Badge
                         className={`border-0 ${
-                          status === "Accepted"
+                          status === "Shortlisted"
                             ? "bg-emerald-500/15 text-emerald-400"
                             : status === "Rejected"
                               ? "bg-red-500/15 text-red-400"

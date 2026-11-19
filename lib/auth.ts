@@ -1,11 +1,12 @@
 
-import { betterAuth } from "better-auth"
-import { MongoClient } from "mongodb"
-import { mongodbAdapter } from "@better-auth/mongo-adapter"
+import { betterAuth } from "better-auth";
+import { MongoClient } from "mongodb";
+import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { admin as adminPlugin } from "better-auth/plugins";
+import { ac, roles } from "./auth-roles";
 
-const client = new MongoClient(process.env.MONGO_DB_URL as string)
-
-const db = client.db("hireloopdb")
+const client = new MongoClient(process.env.MONGO_DB_URL as string);
+const db = client.db("hireloopdb");
 
 export const auth = betterAuth({
   emailAndPassword: {
@@ -14,12 +15,6 @@ export const auth = betterAuth({
 
   user: {
     additionalFields: {
-      role: {
-        type: "string",
-        required: true,
-        defaultValue: "seeker",
-        input: true,
-      },
       plan: {
         type: "string",
         required: true,
@@ -45,7 +40,15 @@ export const auth = betterAuth({
     },
   },
 
+  plugins: [
+    adminPlugin({
+      ac,
+      roles,
+      defaultRole: "seeker",
+    }),
+  ],
+
   database: mongodbAdapter(db, {
     client,
   }),
-})
+});

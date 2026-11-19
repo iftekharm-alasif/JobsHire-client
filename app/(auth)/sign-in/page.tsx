@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { Suspense, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
@@ -22,7 +22,7 @@ import {
   ArrowRight,
 } from "lucide-react"
 
-const SignInPage = () => {
+const SignInForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedRole, setSelectedRole] = useState("seeker")
@@ -347,6 +347,20 @@ const SignInPage = () => {
         </p>
       </div>
     </section>
+  )
+}
+
+const SignInPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#090a0f] text-white">
+          Loading...
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   )
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { Suspense, useState } from "react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { useSearchParams } from "next/navigation"
@@ -21,12 +21,9 @@ import {
   CheckCircle2,
 } from "lucide-react"
 
-const SignUpPage = () => {
+const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<
-    "seeker" | "recruiter" | "admin"
-  >("seeker")
   const searchParams = useSearchParams()
 
   const redirectTo = searchParams.get("redirect")
@@ -46,7 +43,7 @@ const SignUpPage = () => {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       password: formData.get("password") as string,
-      role: selectedRole,
+     
       callbackURL: redirectPath,
     })
 
@@ -143,89 +140,7 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            {/* Role Selection */}
-            <div className="space-y-3">
-              <div>
-                <Label className="text-sm font-medium text-slate-200">
-                  I want to join as a
-                </Label>
 
-                <p className="mt-1 text-xs text-slate-500">
-                  Choose your account type.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                {/* Seeker */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("seeker")}
-                  className={`relative rounded-xl border p-3 text-left transition ${
-                    selectedRole === "seeker"
-                      ? "border-indigo-500 bg-indigo-500/10"
-                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-                  }`}
-                >
-                  {selectedRole === "seeker" && (
-                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
-                  )}
-
-                  <UserRound className="mb-3 h-6 w-6 text-indigo-400" />
-
-                  <h3 className="text-sm font-semibold text-white">
-                    Job Seeker
-                  </h3>
-
-                  <p className="mt-1 text-xs text-slate-400">Find jobs.</p>
-                </button>
-
-                {/* Recruiter */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("recruiter")}
-                  className={`relative rounded-xl border p-3 text-left transition ${
-                    selectedRole === "recruiter"
-                      ? "border-indigo-500 bg-indigo-500/10"
-                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-                  }`}
-                >
-                  {selectedRole === "recruiter" && (
-                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
-                  )}
-
-                  <Building2 className="mb-3 h-6 w-6 text-indigo-400" />
-
-                  <h3 className="text-sm font-semibold text-white">
-                    Recruiter
-                  </h3>
-
-                  <p className="mt-1 text-xs text-slate-400">Hire talent.</p>
-                </button>
-
-                {/* Admin */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole("admin")}
-                  className={`relative rounded-xl border p-3 text-left transition ${
-                    selectedRole === "admin"
-                      ? "border-indigo-500 bg-indigo-500/10"
-                      : "border-slate-800 bg-[#090a0f] hover:border-slate-600"
-                  }`}
-                >
-                  {selectedRole === "admin" && (
-                    <CheckCircle2 className="absolute top-2 right-2 h-4 w-4 text-indigo-400" />
-                  )}
-
-                  <BriefcaseBusiness className="mb-3 h-6 w-6 text-indigo-400" />
-
-                  <h3 className="text-sm font-semibold text-white">Admin</h3>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    Manage platform.
-                  </p>
-                </button>
-              </div>
-            </div>
 
             {/* Password */}
             <div className="space-y-2">
@@ -374,6 +289,20 @@ const SignUpPage = () => {
         </p>
       </div>
     </section>
+  )
+}
+
+const SignUpPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#090a0f] text-white">
+          Loading...
+        </div>
+      }
+    >
+      <SignUpForm />
+    </Suspense>
   )
 }
 
